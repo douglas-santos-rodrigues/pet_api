@@ -1,0 +1,4824 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Prontuário Pet",
+    "version": "1.0.0",
+    "description": "API do Prontuário Pet. A agenda e o histórico usam o mesmo recurso. O código público do pet serve para identificação, com acesso autenticado."
+  },
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "paths": {
+    "/tutor/auth/register": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Criar conta do tutor",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cadastro"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recurso criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id_tutor": {
+                      "type": "string",
+                      "format": "uuid"
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/login": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Entrar com e-mail e senha",
+        "description": "Para navegador, iniciar em GET /sanctum/csrf-cookie fora do prefixo da API. Uma solicitação web stateful recebe sessão, com email_verificado no corpo.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/google": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Entrar com Google",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Google"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Google indisponível.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/vincular-google": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Vincular Google à conta do tutor",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Google"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/logout": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Encerrar sessão ou revogar token atual",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/forgot-password": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Solicitar redefinição de senha",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/reset-password": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Redefinir senha",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email",
+                  "token",
+                  "senha",
+                  "senha_confirmation"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  },
+                  "token": {
+                    "type": "string"
+                  },
+                  "senha": {
+                    "type": "string",
+                    "maxLength": 72
+                  },
+                  "senha_confirmation": {
+                    "type": "string",
+                    "maxLength": 72
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/verificar-email/{id}/{hash}": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Verificar e-mail por link temporário",
+        "security": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "hash",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/auth/reenviar-verificacao": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Reenviar verificação",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/perfil": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Consultar o próprio perfil",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Atualizar perfil e dados pessoais",
+        "description": "Alterar o e-mail exige senha atual e nova verificação.",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PerfilPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Perfil"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/notificacoes/dispositivos/{installation}": {
+      "put": {
+        "tags": ["Tutor"],
+        "summary": "Ativar ou atualizar lembretes em uma instalação",
+        "security": [{ "tutorToken": [] }],
+        "parameters": [{ "name": "installation", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "required": ["platform", "expo_token", "revoke_secret"], "properties": {
+            "platform": { "enum": ["android", "ios"] },
+            "expo_token": { "type": "string", "maxLength": 255 },
+            "revoke_secret": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          } } } }
+        },
+        "responses": {
+          "204": { "description": "Instalação associada ao tutor." },
+          "401": { "description": "Sessão inválida." },
+          "403": { "description": "Acesso negado." },
+          "409": { "description": "A associação ou o token precisa ser renovado." },
+          "422": { "description": "Dados inválidos." },
+          "503": { "description": "Lembretes indisponíveis neste ambiente." }
+        }
+      }
+    },
+    "/notificacoes/dispositivos/{installation}/revogar": {
+      "post": {
+        "tags": ["Tutor"],
+        "summary": "Revogar os lembretes de uma associação do aparelho",
+        "security": [],
+        "parameters": [{ "name": "installation", "in": "path", "required": true, "schema": { "type": "string", "format": "uuid" } }],
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "type": "object", "required": ["revoke_secret"], "properties": {
+            "revoke_secret": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+          } } } }
+        },
+        "responses": {
+          "204": { "description": "Revogação processada. Uma credencial anterior não afeta uma associação nova." },
+          "422": { "description": "Formato da credencial inválido." },
+          "429": { "description": "Limite de requisições excedido." }
+        }
+      }
+    },
+    "/tutor/especies": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Listar espécies",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalogo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/racas": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Listar raças de uma espécie",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "especie_id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalogo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/pets": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Listar pets do tutor",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "por_pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pets"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Cadastrar um pet",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recurso criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                },
+                "example": {
+                  "id_pet": "00000000-0000-4000-8000-000000000001",
+                  "cpf_pet": "PET-000000000000-98",
+                  "nome": "Lua",
+                  "id_especie": 1,
+                  "idade_anos": null
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/pets/{id_pet}": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Consultar um pet do tutor",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Atualizar o cadastro do pet",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PetPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/pets/{id_pet}/foto": {
+      "parameters": [
+        {
+          "name": "id_pet",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "format": "uuid" }
+        }
+      ],
+      "post": {
+        "tags": ["Tutor"],
+        "summary": "Enviar ou substituir a foto de um pet",
+        "security": [{ "tutorToken": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": ["foto"],
+                "properties": {
+                  "foto": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Arquivo JPEG de até 5 MiB e até 1.600 pixels no lado maior."
+                  }
+                }
+              },
+              "encoding": { "foto": { "contentType": "image/jpeg" } }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "Foto salva." },
+          "401": { "description": "Credencial ausente ou inválida." },
+          "403": { "description": "Acesso negado." },
+          "404": { "description": "Pet indisponível para o tutor." },
+          "413": { "description": "Envio acima do limite de tamanho do servidor." },
+          "422": {
+            "description": "Foto ausente ou inválida.",
+            "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } }
+          },
+          "503": { "description": "Armazenamento indisponível." }
+        }
+      },
+      "get": {
+        "tags": ["Tutor"],
+        "summary": "Consultar a foto privada do pet",
+        "security": [{ "tutorToken": [] }],
+        "responses": {
+          "200": {
+            "description": "Imagem com cache privado desabilitado.",
+            "headers": { "Cache-Control": { "schema": { "type": "string", "example": "private, no-store" } } },
+            "content": { "image/jpeg": { "schema": { "type": "string", "format": "binary" } } }
+          },
+          "401": { "description": "Credencial ausente ou inválida." },
+          "403": { "description": "Acesso negado." },
+          "404": { "description": "Foto ou pet indisponível para o tutor." }
+        }
+      },
+      "delete": {
+        "tags": ["Tutor"],
+        "summary": "Remover a foto e a referência de URL do pet",
+        "security": [{ "tutorToken": [] }],
+        "responses": {
+          "204": { "description": "Pet sem foto." },
+          "401": { "description": "Credencial ausente ou inválida." },
+          "403": { "description": "Acesso negado." },
+          "404": { "description": "Pet indisponível para o tutor." }
+        }
+      }
+    },
+    "/tutor/pets/{id_pet}/transferencia": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Enviar convite de transferência",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email_destino"
+                ],
+                "properties": {
+                  "email_destino": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mensagem"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/pets/{id_pet}/transferencia/confirmar": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Confirmar transferência recebida",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "destino",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "versao",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/integracoes/auth/token": {
+      "post": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Trocar credenciais por token de integração",
+        "description": "Token Bearer opaco com validade de 15 minutos.",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Credencial"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Token"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/integracoes/pets/{cpf_pet}": {
+      "get": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Buscar pet por código exato",
+        "description": "Retorna a projeção pública para parceiros autorizados, sem perfil do tutor.",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cpf_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^PET-[0-9A-HJKMNP-TV-Z]{12}-[0-9]{2}$"
+            },
+            "description": "Código público exato. O servidor normaliza a caixa."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Pet"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/tipos-procedimento": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Listar tipos de procedimento",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalogo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/pets/{id_pet}/prontuario": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Consultar histórico e agenda",
+        "description": "Para agenda use status=AGENDADO. Para eventos realizados use status=REALIZADO. Datas retornam em UTC.",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "por_pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AGENDADO",
+                "REALIZADO",
+                "CANCELADO",
+                "NAO_REALIZADO"
+              ]
+            }
+          },
+          {
+            "name": "id_tipo_procedimento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "inicio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "fim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "ordenacao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registros"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Registrar procedimento ou compromisso",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recurso criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/prontuario/{id_registro}": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Consultar registro e anexos visíveis",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_registro",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Corrigir registro próprio",
+        "description": "O tutor responsável altera apenas registros de sua autoria.",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_registro",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/prontuario/{id_registro}/anexos": {
+      "post": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Adicionar arquivo ao registro",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_registro",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AnexoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Recurso criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Anexo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/anexos/{id_anexo}/download": {
+      "get": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Baixar arquivo privado",
+        "description": "Exige credencial e permissão atual, inclusive para links temporários.",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_anexo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/integracoes/tipos-procedimento": {
+      "get": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Listar tipos de procedimento",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Catalogo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/integracoes/pets/{cpf_pet}/prontuario": {
+      "get": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Consultar histórico e agenda",
+        "description": "Para agenda use status=AGENDADO. Para eventos realizados use status=REALIZADO. Datas retornam em UTC.",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cpf_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^PET-[0-9A-HJKMNP-TV-Z]{12}-[0-9]{2}$"
+            },
+            "description": "Código público exato. O servidor normaliza a caixa."
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "por_pagina",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "AGENDADO",
+                "REALIZADO",
+                "CANCELADO",
+                "NAO_REALIZADO"
+              ]
+            }
+          },
+          {
+            "name": "id_tipo_procedimento",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          {
+            "name": "inicio",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "fim",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "ordenacao",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registros"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Registrar procedimento ou compromisso",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "cpf_pet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^PET-[0-9A-HJKMNP-TV-Z]{12}-[0-9]{2}$"
+            },
+            "description": "Código público exato. O servidor normaliza a caixa."
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "description": "Chave por empresa. Mesmo conteúdo retorna o recurso existente. Conteúdo diferente retorna 409."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reenvio idempotente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registro"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Recurso criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/integracoes/prontuario/{id_registro}": {
+      "get": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Consultar registro e anexos visíveis",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_registro",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Corrigir registro próprio",
+        "description": "A empresa autora informa motivo_correcao.",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_registro",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistroPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Registro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/integracoes/prontuario/{id_registro}/anexos": {
+      "post": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Adicionar arquivo ao registro",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_registro",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "maxLength": 100
+            },
+            "description": "Chave por empresa. Mesmo conteúdo retorna o recurso existente. Conteúdo diferente retorna 409."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/AnexoInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reenvio idempotente.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Anexo"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Recurso criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Anexo"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/integracoes/anexos/{id_anexo}/download": {
+      "get": {
+        "tags": [
+          "Integrações"
+        ],
+        "summary": "Baixar arquivo privado",
+        "description": "Exige credencial e permissão atual, inclusive para links temporários.",
+        "security": [
+          {
+            "empresaToken": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_anexo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "signature",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "expires",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Sucesso.",
+            "content": {
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    },
+    "/tutor/anexos/{id_anexo}": {
+      "delete": {
+        "tags": [
+          "Tutor"
+        ],
+        "summary": "Excluir logicamente um anexo próprio",
+        "security": [
+          {
+            "tutorToken": []
+          },
+          {
+            "sessaoWeb": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "id_anexo",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Sucesso sem conteúdo."
+          },
+          "401": {
+            "description": "Credencial ausente, inválida ou expirada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Acesso negado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Recurso indisponível para o solicitante.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflito com o estado atual.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validação do pedido falhou.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Limite de requisições excedido.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "default": {
+            "$ref": "#/components/responses/Erro"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "tutorToken": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "empresaToken": {
+        "type": "http",
+        "scheme": "bearer"
+      },
+      "sessaoWeb": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "laravel_session",
+        "description": "Requer X-XSRF-TOKEN em mutações após GET /sanctum/csrf-cookie."
+      }
+    },
+    "responses": {
+      "Erro": {
+        "description": "A solicitação falhou.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "request_id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "errors": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "PetInput": {
+        "type": "object",
+        "required": [
+          "nome",
+          "id_especie"
+        ],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "id_especie": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "id_raca": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "sexo": {
+            "enum": [
+              "M",
+              "F",
+              null
+            ]
+          },
+          "dt_nascimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "nascimento_estimado": {
+            "type": "boolean"
+          },
+          "cor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "pelagem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "porte": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "castrado": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "dt_castracao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "microchip": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "registro_oficial": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "peso_atual": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          },
+          "tipo_sanguineo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 30
+          },
+          "alergias": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "doencas_cronicas": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "medicamentos_continuos": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "observacoes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "foto_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "status": {
+            "enum": [
+              "ATIVO",
+              "DESAPARECIDO",
+              "FALECIDO",
+              "INATIVO"
+            ]
+          },
+          "dt_obito": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        },
+        "example": {
+          "nome": "Lua",
+          "id_especie": 1
+        }
+      },
+      "PetPatch": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "id_especie": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "id_raca": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "sexo": {
+            "enum": [
+              "M",
+              "F",
+              null
+            ]
+          },
+          "dt_nascimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "nascimento_estimado": {
+            "type": "boolean"
+          },
+          "cor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "pelagem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "porte": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "castrado": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "dt_castracao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "microchip": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "registro_oficial": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "peso_atual": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          },
+          "tipo_sanguineo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 30
+          },
+          "alergias": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "doencas_cronicas": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "medicamentos_continuos": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "observacoes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "foto_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "status": {
+            "enum": [
+              "ATIVO",
+              "DESAPARECIDO",
+              "FALECIDO",
+              "INATIVO"
+            ]
+          },
+          "dt_obito": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          }
+        }
+      },
+      "Pet": {
+        "type": "object",
+        "required": [
+          "nome",
+          "cpf_pet"
+        ],
+        "properties": {
+          "foto_enviada": {
+            "type": "boolean",
+            "readOnly": true,
+            "description": "Incluído nas respostas do tutor. Indica a presença de uma foto no armazenamento privado."
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "id_especie": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "id_raca": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1
+          },
+          "sexo": {
+            "enum": [
+              "M",
+              "F",
+              null
+            ]
+          },
+          "dt_nascimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "nascimento_estimado": {
+            "type": "boolean"
+          },
+          "cor": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "pelagem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "porte": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "castrado": {
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
+          "dt_castracao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "microchip": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "registro_oficial": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "peso_atual": {
+            "type": [
+              "number",
+              "string",
+              "null"
+            ]
+          },
+          "tipo_sanguineo": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 30
+          },
+          "alergias": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "doencas_cronicas": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "medicamentos_continuos": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "observacoes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 5000
+          },
+          "foto_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "status": {
+            "enum": [
+              "ATIVO",
+              "DESAPARECIDO",
+              "FALECIDO",
+              "INATIVO"
+            ]
+          },
+          "dt_obito": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "id_pet": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id_tutor": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "cpf_pet": {
+            "type": "string",
+            "pattern": "^PET-[0-9A-HJKMNP-TV-Z]{12}-[0-9]{2}$"
+          },
+          "idade_anos": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "RegistroInput": {
+        "type": "object",
+        "required": [
+          "id_tipo_procedimento",
+          "titulo",
+          "status"
+        ],
+        "properties": {
+          "id_tipo_procedimento": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "titulo": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AGENDADO",
+              "REALIZADO",
+              "CANCELADO",
+              "NAO_REALIZADO"
+            ]
+          },
+          "descricao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20000
+          },
+          "observacoes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 10000
+          },
+          "id_registro_origem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "dt_agendamento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "dt_fim_agendamento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "dt_realizacao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "profissional_nome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 150
+          },
+          "profissional_registro": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "local_atendimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "dados_adicionais": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Campos opcionais por tipo. Vacina/reforço: nome_vacina, fabricante, lote, dose. Exame: nome_exame, resultado_resumido. Pesagem: peso_kg. Outros tipos: objeto vazio ou nulo."
+          }
+        },
+        "example": {
+          "id_tipo_procedimento": 1,
+          "titulo": "Consulta de rotina",
+          "status": "REALIZADO",
+          "dt_realizacao": "2025-05-10T12:00:00-03:00"
+        }
+      },
+      "RegistroPatch": {
+        "type": "object",
+        "properties": {
+          "id_tipo_procedimento": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "titulo": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AGENDADO",
+              "REALIZADO",
+              "CANCELADO",
+              "NAO_REALIZADO"
+            ]
+          },
+          "descricao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20000
+          },
+          "observacoes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 10000
+          },
+          "id_registro_origem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "dt_agendamento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "dt_fim_agendamento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "dt_realizacao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "profissional_nome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 150
+          },
+          "profissional_registro": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "local_atendimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "dados_adicionais": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Campos opcionais por tipo. Vacina/reforço: nome_vacina, fabricante, lote, dose. Exame: nome_exame, resultado_resumido. Pesagem: peso_kg. Outros tipos: objeto vazio ou nulo."
+          },
+          "motivo_correcao": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "Registro": {
+        "type": "object",
+        "required": [
+          "id_registro",
+          "titulo",
+          "status",
+          "origem"
+        ],
+        "properties": {
+          "id_tipo_procedimento": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "titulo": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "AGENDADO",
+              "REALIZADO",
+              "CANCELADO",
+              "NAO_REALIZADO"
+            ]
+          },
+          "descricao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20000
+          },
+          "observacoes": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 10000
+          },
+          "id_registro_origem": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uuid"
+          },
+          "dt_agendamento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "dt_fim_agendamento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "dt_realizacao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "profissional_nome": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 150
+          },
+          "profissional_registro": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 50
+          },
+          "local_atendimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "dados_adicionais": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Campos opcionais por tipo. Vacina/reforço: nome_vacina, fabricante, lote, dose. Exame: nome_exame, resultado_resumido. Pesagem: peso_kg. Outros tipos: objeto vazio ou nulo."
+          },
+          "id_registro": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id_pet": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "origem": {
+            "enum": [
+              "TUTOR",
+              "EMPRESA"
+            ]
+          },
+          "declaracao_do_tutor": {
+            "type": "boolean"
+          },
+          "anexos": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Anexo"
+            }
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "AnexoInput": {
+        "type": "object",
+        "required": [
+          "arquivo"
+        ],
+        "properties": {
+          "arquivo": {
+            "type": "string",
+            "format": "binary"
+          },
+          "descricao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000
+          },
+          "classificacao": {
+            "enum": [
+              "PRIVADO",
+              "COMPARTILHAVEL",
+              "COPIA_OFICIAL"
+            ]
+          }
+        }
+      },
+      "Anexo": {
+        "type": "object",
+        "required": [
+          "id_anexo",
+          "classificacao"
+        ],
+        "properties": {
+          "id_anexo": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "id_registro": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nome_original": {
+            "type": "string",
+            "maxLength": 255
+          },
+          "mime_type": {
+            "enum": [
+              "image/jpeg",
+              "image/png",
+              "application/pdf"
+            ]
+          },
+          "tamanho_bytes": {
+            "type": "integer"
+          },
+          "descricao": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000
+          },
+          "classificacao": {
+            "enum": [
+              "PRIVADO",
+              "COMPARTILHAVEL",
+              "COPIA_OFICIAL"
+            ]
+          },
+          "download_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Perfil": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "cpf": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 11
+          },
+          "telefone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "celular": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "dt_nascimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "cep": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 8
+          },
+          "logradouro": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "numero": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "complemento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "bairro": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "cidade": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "uf": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2
+          },
+          "codigo_ibge": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 7
+          },
+          "pais": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2
+          },
+          "foto_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "id_tutor": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email_verificado_em": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "ativo": {
+            "type": "boolean"
+          },
+          "ultimo_acesso_em": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "PerfilPatch": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "cpf": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 11
+          },
+          "telefone": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "celular": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "dt_nascimento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date"
+          },
+          "cep": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 8
+          },
+          "logradouro": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 200
+          },
+          "numero": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 20
+          },
+          "complemento": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "bairro": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "cidade": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 100
+          },
+          "uf": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2
+          },
+          "codigo_ibge": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 7
+          },
+          "pais": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2
+          },
+          "foto_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "senha_atual": {
+            "type": "string",
+            "maxLength": 72
+          }
+        }
+      },
+      "Cadastro": {
+        "type": "object",
+        "required": [
+          "nome",
+          "email",
+          "senha",
+          "senha_confirmation"
+        ],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 150
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "senha": {
+            "type": "string",
+            "maxLength": 72
+          },
+          "senha_confirmation": {
+            "type": "string",
+            "maxLength": 72
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "required": [
+          "email",
+          "senha"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "senha": {
+            "type": "string",
+            "maxLength": 72
+          },
+          "dispositivo": {
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      },
+      "Google": {
+        "type": "object",
+        "required": [
+          "id_token"
+        ],
+        "properties": {
+          "id_token": {
+            "type": "string",
+            "maxLength": 8192
+          },
+          "dispositivo": {
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      },
+      "Credencial": {
+        "type": "object",
+        "required": [
+          "client_id",
+          "client_secret"
+        ],
+        "properties": {
+          "client_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "client_secret": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "Token": {
+        "type": "object",
+        "properties": {
+          "access_token": {
+            "type": "string"
+          },
+          "token_type": {
+            "const": "Bearer"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_in": {
+            "type": "integer"
+          },
+          "email_verificado": {
+            "type": "boolean"
+          }
+        },
+        "example": {
+          "access_token": "1|token-ficticio",
+          "token_type": "Bearer",
+          "expires_in": 900
+        }
+      },
+      "Mensagem": {
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Pets": {
+        "type": "object",
+        "required": [
+          "data",
+          "current_page",
+          "per_page",
+          "last_page",
+          "total"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Pet"
+            }
+          },
+          "current_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "per_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "last_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total": {
+            "type": "integer"
+          },
+          "next_page_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "Registros": {
+        "type": "object",
+        "required": [
+          "data",
+          "current_page",
+          "per_page",
+          "last_page",
+          "total"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Registro"
+            }
+          },
+          "current_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "per_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "last_page": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "total": {
+            "type": "integer"
+          },
+          "next_page_url": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "Catalogo": {
+        "type": "object",
+        "required": [
+          "data"
+        ],
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nome": {
+                  "type": "string",
+                  "maxLength": 120
+                },
+                "id_especie": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "id_raca": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "id_tipo_procedimento": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "ativo": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

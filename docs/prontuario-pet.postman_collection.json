@@ -1,0 +1,1987 @@
+{
+  "info": {
+    "name": "Prontuário Pet — API v1",
+    "description": "Coleção Postman 2.1 para a API Laravel com PostgreSQL. Importe o JSON e execute somente a pasta Fluxo automatizado com um tutor verificado e uma empresa LEITURA_ESCRITA de teste. Use dados fictícios: a execução cria pet e procedimentos. A pasta Operações manuais contém os endpoints dependentes de arquivo, e-mail, Google ou dados adicionais.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const fields = [\"tutor_email\",\"tutor_senha\",\"empresa_client_id\",\"empresa_client_secret\",\"especie_id\",\"tipo_consulta_id\",\"tutor_nova_senha\",\"token_reset\",\"google_id_token\",\"tutor_destino_email\"];",
+          "fields.forEach(function (field) {",
+          "    const value = pm.variables.get(field);",
+          "    if (field === 'especie_id' || field === 'tipo_consulta_id') {",
+          "        pm.variables.set(field + '_json', value ? JSON.stringify(Number(value)) : 'null');",
+          "    } else {",
+          "        pm.variables.set(field + '_json', JSON.stringify(value || ''));",
+          "    }",
+          "});"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000",
+      "type": "string"
+    },
+    {
+      "key": "tutor_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tutor_senha",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "empresa_client_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "empresa_client_secret",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "novo_tutor_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "novo_tutor_senha",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tutor_nova_senha",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "token_reset",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "google_id_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "tutor_destino_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "verificacao_url",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "confirmacao_transferencia_url",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "destino_token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Fluxo automatizado",
+      "description": "Execute esta pasta em ordem. Cada execução cria um pet e novos eventos fictícios no banco selecionado.",
+      "item": [
+        {
+          "name": "01. Verificar se a API está no ar",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/up"
+          },
+          "response": []
+        },
+        {
+          "name": "02. Bloquear consulta sem autenticação",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 401', function () {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/pets"
+          },
+          "response": []
+        },
+        {
+          "name": "03. Entrar como tutor verificado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().email_verificado).to.eql(true);",
+                  "        const value = pm.response.json().access_token;",
+                  "        pm.expect(value).to.be.a('string').and.not.empty;",
+                  "        pm.collectionVariables.set('tutor_token', value);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {{tutor_email_json}},\n  \"senha\": {{tutor_senha_json}},\n  \"dispositivo\": \"Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/auth/login"
+          },
+          "response": []
+        },
+        {
+          "name": "04. Consultar perfil do tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().email).to.eql(pm.variables.get('tutor_email').toLowerCase());",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/perfil"
+          },
+          "response": []
+        },
+        {
+          "name": "05. Obter espécie para o pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        const species = pm.response.json().data[0];",
+                  "        pm.expect(species).to.have.property('id_especie');",
+                  "        pm.collectionVariables.set('especie_id', Number(species.id_especie));",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/especies"
+          },
+          "response": []
+        },
+        {
+          "name": "06. Listar raças da espécie",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().data).to.be.an('array');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/racas?especie_id={{especie_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "07. Obter tipo Consulta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        const tipo = pm.response.json().data.find(function (item) { return item.nome === 'Consulta'; });",
+                  "        pm.expect(tipo).to.have.property('id_tipo_procedimento');",
+                  "        pm.collectionVariables.set('tipo_consulta_id', Number(tipo.id_tipo_procedimento));",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/tipos-procedimento"
+          },
+          "response": []
+        },
+        {
+          "name": "08. Cadastrar pet fictício",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        const pet = pm.response.json();",
+                  "        pm.expect(pet.id_pet).to.be.a('string').and.not.empty;",
+                  "        pm.expect(pet.cpf_pet).to.match(/^PET-[0-9A-Z]{12}-[0-9]{2}$/);",
+                  "        pm.collectionVariables.set('pet_id', pet.id_pet);",
+                  "        pm.collectionVariables.set('cpf_pet', pet.cpf_pet);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Lua de teste\",\n  \"id_especie\": {{especie_id_json}},\n  \"sexo\": \"F\",\n  \"cor\": \"Branca\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/pets"
+          },
+          "response": []
+        },
+        {
+          "name": "09. Consultar pet cadastrado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().cpf_pet).to.eql(pm.collectionVariables.get('cpf_pet'));",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/pets/{{pet_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "10. Atualizar pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().cor).to.eql(\"Branca e cinza\");",
+                  "        pm.expect(pm.response.json().cpf_pet).to.eql(pm.collectionVariables.get('cpf_pet'));",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cor\": \"Branca e cinza\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/pets/{{pet_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "11. Listar pets do tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().total).to.be.at.least(1);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/pets?por_pagina=25"
+          },
+          "response": []
+        },
+        {
+          "name": "12. Agendar consulta",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('instante_agendado', new Date(Date.now() + 3600000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().status).to.eql(\"AGENDADO\");",
+                  "        const value = pm.response.json().id_registro;",
+                  "        pm.expect(value).to.be.a('string').and.not.empty;",
+                  "        pm.collectionVariables.set('registro_tutor_id', value);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_tipo_procedimento\": {{tipo_consulta_id_json}},\n  \"titulo\": \"Consulta fictícia agendada\",\n  \"status\": \"AGENDADO\",\n  \"dt_agendamento\": \"{{instante_agendado}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/pets/{{pet_id}}/prontuario"
+          },
+          "response": []
+        },
+        {
+          "name": "13. Consultar agenda",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().data.some(function (item) { return item.id_registro === pm.collectionVariables.get('registro_tutor_id'); })).to.eql(true);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/pets/{{pet_id}}/prontuario?status=AGENDADO"
+          },
+          "response": []
+        },
+        {
+          "name": "14. Concluir consulta",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('instante_tutor', new Date(Date.now() - 60000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().status).to.eql(\"REALIZADO\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"REALIZADO\",\n  \"dt_realizacao\": \"{{instante_tutor}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/prontuario/{{registro_tutor_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "15. Ver prontuário realizado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().data.some(function (item) { return item.id_registro === pm.collectionVariables.get('registro_tutor_id'); })).to.eql(true);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/pets/{{pet_id}}/prontuario?status=REALIZADO"
+          },
+          "response": []
+        },
+        {
+          "name": "16. Ver detalhes do procedimento",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().origem).to.eql(\"TUTOR\");",
+                  "        pm.expect(pm.response.json().declaracao_do_tutor).to.eql(true);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/prontuario/{{registro_tutor_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "17. Obter token da empresa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().token_type).to.eql(\"Bearer\");",
+                  "        const value = pm.response.json().access_token;",
+                  "        pm.expect(value).to.be.a('string').and.not.empty;",
+                  "        pm.collectionVariables.set('empresa_token', value);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"client_id\": {{empresa_client_id_json}},\n  \"client_secret\": {{empresa_client_secret_json}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/integracoes/auth/token"
+          },
+          "response": []
+        },
+        {
+          "name": "18. Buscar pelo código do pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        const pet = pm.response.json();",
+                  "        pm.expect(pet.cpf_pet).to.eql(pm.collectionVariables.get('cpf_pet'));",
+                  "        pm.expect(pet).not.to.have.property('id_tutor');",
+                  "        pm.expect(pet).not.to.have.property('email');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/integracoes/pets/{{cpf_pet}}"
+          },
+          "response": []
+        },
+        {
+          "name": "19. Ler o prontuário pela empresa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().data).to.be.an('array');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/integracoes/pets/{{cpf_pet}}/prontuario"
+          },
+          "response": []
+        },
+        {
+          "name": "20. Publicar procedimento pela empresa",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('chave_procedimento', 'postman-' + pm.variables.replaceIn('{{$guid}}'));",
+                  "pm.collectionVariables.set('instante_empresa', new Date(Date.now() - 60000).toISOString());"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().origem).to.eql(\"EMPRESA\");",
+                  "        const value = pm.response.json().id_registro;",
+                  "        pm.expect(value).to.be.a('string').and.not.empty;",
+                  "        pm.collectionVariables.set('registro_empresa_id', value);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chave_procedimento}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_tipo_procedimento\": {{tipo_consulta_id_json}},\n  \"titulo\": \"Consulta fictícia da empresa\",\n  \"status\": \"REALIZADO\",\n  \"dt_realizacao\": \"{{instante_empresa}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/integracoes/pets/{{cpf_pet}}/prontuario"
+          },
+          "response": []
+        },
+        {
+          "name": "21. Reenviar com a mesma chave",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().id_registro).to.eql(pm.collectionVariables.get('registro_empresa_id'));",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chave_procedimento}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_tipo_procedimento\": {{tipo_consulta_id_json}},\n  \"titulo\": \"Consulta fictícia da empresa\",\n  \"status\": \"REALIZADO\",\n  \"dt_realizacao\": \"{{instante_empresa}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/integracoes/pets/{{cpf_pet}}/prontuario"
+          },
+          "response": []
+        },
+        {
+          "name": "22. Ler registro da empresa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().origem).to.eql(\"EMPRESA\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/integracoes/prontuario/{{registro_empresa_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "23. Corrigir registro da empresa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().titulo).to.eql(\"Consulta fictícia corrigida\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Consulta fictícia corrigida\",\n  \"motivo_correcao\": \"Teste de retificação pelo autor\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/integracoes/prontuario/{{registro_empresa_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "24. Impedir tutor de editar registro da empresa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 403', function () {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Alteração não autorizada\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/prontuario/{{registro_empresa_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "25. Listar tipos pela empresa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().data).to.be.an('array');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/integracoes/tipos-procedimento"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Operações manuais",
+      "description": "Escolha cada requisição individualmente e ajuste pré-requisitos, credenciais e arquivos conforme a descrição.",
+      "item": [
+        {
+          "name": "Cadastrar tutor por e-mail",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const email = (pm.variables.get('novo_tutor_email') || '').trim() || 'postman-' + pm.variables.replaceIn('{{$guid}}') + '@example.test';",
+                  "const senha = pm.variables.get('novo_tutor_senha') || 'Postman-' + pm.variables.replaceIn('{{$guid}}');",
+                  "pm.variables.set('cadastro_email_json', JSON.stringify(email));",
+                  "pm.variables.set('cadastro_senha_json', JSON.stringify(senha));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test('Tutor criado com o e-mail enviado', function () {",
+                  "        pm.expect(pm.response.json().email).to.eql(JSON.parse(pm.variables.get('cadastro_email_json')).toLowerCase());",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Novo tutor de teste\",\n  \"email\": {{cadastro_email_json}},\n  \"senha\": {{cadastro_senha_json}},\n  \"senha_confirmation\": {{cadastro_senha_json}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/auth/register",
+            "description": "Gera um e-mail fictício e uma senha aleatória quando os campos estão vazios. Para escolher as credenciais e usá-las depois no login, preencha novo_tutor_email e novo_tutor_senha nas variáveis locais do Postman."
+          },
+          "response": []
+        },
+        {
+          "name": "Verificar e-mail pelo link assinado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{verificacao_url}}",
+            "description": "Cole a URL completa recebida por e-mail. O ambiente local com MAIL_MAILER=array não entrega e-mails."
+          },
+          "response": []
+        },
+        {
+          "name": "Reenviar link de verificação",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/auth/reenviar-verificacao"
+          },
+          "response": []
+        },
+        {
+          "name": "Solicitar recuperação de senha",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {{tutor_email_json}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/auth/forgot-password"
+          },
+          "response": []
+        },
+        {
+          "name": "Redefinir senha",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": {{tutor_email_json}},\n  \"token\": {{token_reset_json}},\n  \"senha\": {{tutor_nova_senha_json}},\n  \"senha_confirmation\": {{tutor_nova_senha_json}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/auth/reset-password"
+          },
+          "response": []
+        },
+        {
+          "name": "Entrar com Google",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        const value = pm.response.json().access_token;",
+                  "        pm.expect(value).to.be.a('string').and.not.empty;",
+                  "        pm.collectionVariables.set('tutor_token', value);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_token\": {{google_id_token_json}},\n  \"dispositivo\": \"Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/auth/google",
+            "description": "Requer GOOGLE_CLIENT_IDS no Laravel e um id_token válido emitido pelo Google."
+          },
+          "response": []
+        },
+        {
+          "name": "Vincular Google ao tutor autenticado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id_token\": {{google_id_token_json}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/auth/vincular-google"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar perfil",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "if (pm.response.code === 200) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.expect(pm.response.json().nome).to.eql(\"Tutor fictício atualizado\");",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Tutor fictício atualizado\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/perfil"
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar anexo do tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        const value = pm.response.json().id_anexo;",
+                  "        pm.expect(value).to.be.a('string').and.not.empty;",
+                  "        pm.collectionVariables.set('anexo_tutor_id', value);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/tutor/prontuario/{{registro_tutor_id}}/anexos",
+            "description": "Selecione um JPEG, PNG ou PDF no campo arquivo antes de enviar."
+          },
+          "response": []
+        },
+        {
+          "name": "Baixar anexo do tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/anexos/{{anexo_tutor_id}}/download"
+          },
+          "response": []
+        },
+        {
+          "name": "Excluir logicamente anexo do tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/anexos/{{anexo_tutor_id}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Enviar anexo da empresa",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set('chave_anexo', 'postman-' + pm.variables.replaceIn('{{$guid}}'));"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 201', function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        const value = pm.response.json().id_anexo;",
+                  "        pm.expect(value).to.be.a('string').and.not.empty;",
+                  "        pm.collectionVariables.set('anexo_empresa_id', value);",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Idempotency-Key",
+                "value": "{{chave_anexo}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "arquivo",
+                  "type": "file",
+                  "src": []
+                },
+                {
+                  "key": "classificacao",
+                  "type": "text",
+                  "value": "PRIVADO"
+                }
+              ]
+            },
+            "url": "{{base_url}}/api/v1/integracoes/prontuario/{{registro_empresa_id}}/anexos",
+            "description": "Selecione um arquivo de teste. A chave desta requisição é renovada a cada envio manual."
+          },
+          "response": []
+        },
+        {
+          "name": "Baixar anexo da empresa",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{empresa_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/integracoes/anexos/{{anexo_empresa_id}}/download"
+          },
+          "response": []
+        },
+        {
+          "name": "Convidar outro tutor para transferência",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 202', function () {",
+                  "    pm.response.to.have.status(202);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email_destino\": {{tutor_destino_email_json}}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": "{{base_url}}/api/v1/tutor/pets/{{pet_id}}/transferencia",
+            "description": "Utilize outro tutor verificado do banco de testes e e-mail configurado."
+          },
+          "response": []
+        },
+        {
+          "name": "Confirmar transferência pelo destinatário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{destino_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{confirmacao_transferencia_url}}",
+            "description": "Cole a URL assinada completa e preencha destino_token com o token do tutor destinatário."
+          },
+          "response": []
+        },
+        {
+          "name": "Encerrar sessão do tutor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('HTTP 204', function () {",
+                  "    pm.response.to.have.status(204);",
+                  "});",
+                  "if (pm.response.code === 204) {",
+                  "    pm.test('Contrato da resposta', function () {",
+                  "        pm.collectionVariables.unset('tutor_token');",
+                  "    });",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{tutor_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{base_url}}/api/v1/tutor/auth/logout"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

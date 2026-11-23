@@ -1,0 +1,9 @@
+/.env
+/.env.*
+!/.env.example
+/vendor/
+/.phpunit.cache/
+/bootstrap/cache/*.php
+/storage/**/*.log
+/storage/app/private/*
+!/storage/app/private/.gitignore
